@@ -1,0 +1,102 @@
+Step 1: 
+npm init -y
+npm install --save-dev hardhat @nomicfoundation/hardhat-toolbox dotenv
+npx hardhat init
+Pilih:
+> Create a JavaScript project
+
+This will generate:
+/contracts
+/scripts // yang ini tambahin sendiri
+/test
+hardhat.config.js
+
+Create a .env file:
+PRIVATE_KEY=your_wallet_private_key
+RPC_URL=https://testnet-rpc.taranium.com/
+
+Step 2:
+Update hardhat.config.js
+require("@nomicfoundation/hardhat-toolbox");
+require("dotenv").config();
+
+/** @type import('hardhat/config').HardhatUserConfig */
+module.exports = {
+  solidity: "0.8.20", // or your version
+  networks: {
+    "taranium-smartchain": {
+      url: process.env.RPC_URL,
+      chainId: 9924,
+      accounts: [process.env.PRIVATE_KEY],
+    },
+  },
+  etherscan: {
+    apiKey: {
+      "taranium-smartchain": "empty"
+    },
+    customChains: [
+      {
+        network: "taranium-smartchain",
+        chainId: 9924,
+        urls: {
+          apiURL: "https://testnet-scan.taranium.com/api",
+          browserURL: "https://testnet-scan.taranium.com"
+        }
+      }
+    ]
+  }
+};
+
+Step 3:
+Write Your Smart Contracts
+Create your contract(s) inside /contracts/.
+
+Example:
+Crowdfunding.sol
+CrowdfundingFactory.sol
+
+Step 4:
+Write Deployment Script
+File: /scripts/deploy.js
+
+const fs = require("fs");
+const path = require("path");
+const hre = require("hardhat");
+
+async function main() {
+  const Factory = await hre.ethers.getContractFactory("CrowdfundingFactory");
+  const factory = await Factory.deploy();
+  await factory.waitForDeployment();
+
+  const contractAddress = await factory.getAddress();
+  console.log("CrowdfundingFactory deployed at:", contractAddress);
+
+  const contractsDir = path.join(__dirname, "..", "frontend-artifacts");
+  if (!fs.existsSync(contractsDir)) {
+    fs.mkdirSync(contractsDir);
+  }
+
+  fs.writeFileSync(
+    path.join(contractsDir, "CrowdfundingFactory-address.json"),
+    JSON.stringify({ address: contractAddress }, null, 2)
+  );
+
+  const artifact = await hre.artifacts.readArtifact("CrowdfundingFactory");
+
+  fs.writeFileSync(
+    path.join(contractsDir, "CrowdfundingFactory.json"),
+    JSON.stringify(artifact, null, 2)
+  );
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
+
+Step 5:
+npm install --save-dev @nomicfoundation/hardhat-verify
+npx hardhat compile
+npx hardhat run scripts/deploy.js --network sepolia
+npx hardhat verify --network sepolia 0x347C7fBb8504F9a652D540b0a90d6A98526Beae4
+npx hardhat verify --network sepolia 0x347C7fBb8504F9a652D540b0a90d6A98526Beae4 "0x4c8672A8061b132518eE5079F6e80f7F97AdB417" "In The Bleak Midwinter" "The truth is we died together once before. Arthur me... Danny Whizz-Bang Freddie Thorne Jeremiah and John. We were cut off from the retreat no bullets left waiting for the Prussian cavalry to come and to finish us off. And while we waited Jeremiah said we should sing In The Bleak Midwinter. But we were spared; the enemy never came. And we all agreed that everything after that was extra. And when our time came we would all remember." 25000
