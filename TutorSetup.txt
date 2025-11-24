@@ -98,5 +98,5 @@ Step 5:
 npm install --save-dev @nomicfoundation/hardhat-verify
 npx hardhat compile
 npx hardhat run scripts/deploy.js --network sepolia
-npx hardhat verify --network sepolia 0xA1fBEC874a97934b79D9b5f87dbe871830ee6628
-npx hardhat verify --network sepolia 0xA1fBEC874a97934b79D9b5f87dbe871830ee6628 "0x4c8672A8061b132518eE5079F6e80f7F97AdB417" "Sow and Reap - Restore Earth" "The truth is we died together once before. Arthur me... Danny Whizz-Bang Freddie Thorne Jeremiah and John. We were cut off from the retreat no bullets left waiting for the Prussian cavalry to come and to finish us off. And while we waited Jeremiah said we should sing In The Bleak Midwinter. But we were spared; the enemy never came. And we all agreed that everything after that was extra. And when our time came we would all remember." 25000
+npx hardhat verify --network sepolia 0x78747BAA22d80580E00b09E0aDA399C9eB62d1b7
+npx hardhat verify --network sepolia 0x78747BAA22d80580E00b09E0aDA399C9eB62d1b7 "0x4c8672A8061b132518eE5079F6e80f7F97AdB417" "Sow and Reap - Restore Earth" "The truth is we died together once before. Arthur me... Danny Whizz-Bang Freddie Thorne Jeremiah and John. We were cut off from the retreat no bullets left waiting for the Prussian cavalry to come and to finish us off. And while we waited Jeremiah said we should sing In The Bleak Midwinter. But we were spared; the enemy never came. And we all agreed that everything after that was extra. And when our time came we would all remember." 25000

@@ -275,6 +275,7 @@ contract Crowdfunding {
 
         backers[msg.sender].totalContribution = 0;
         totalContributions -= amount;
+        compoundingContributions -= amount;
 
         payable(msg.sender).transfer(amount);
 
