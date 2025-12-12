@@ -261,7 +261,7 @@ contract Crowdfunding {
             for (uint256 i = 1; i <= withdrawRequestCount; i++) {
                 WithdrawRequest storage req = withdrawRequests[i];
                 uint8 v = req.votes[msg.sender];
-                if (v == 2 || v == 0) {
+                if (v == 2) {
                     eligible = true;
                     break;
                 }

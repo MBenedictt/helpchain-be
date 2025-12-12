@@ -30,9 +30,9 @@ describe("Crowdfunding.sol - finalizeWithdrawRequest()", function () {
     it("should finalize successfully when YES votes are enough", async function () {
         console.log("\n=== Kasus Uji (a): Voting mayoritas YES, pencairan berhasil ===");
 
-        // Backer1 vote YES
-        await crowdfunding.connect(backer1).confirmWithdrawRequest(1, true);
-        // Backer2 tidak vote (anggap implicit YES)
+        // Backer2 vote YES
+        await crowdfunding.connect(backer2).confirmWithdrawRequest(1, true);
+        // Backer1 tidak vote
 
         // Tunggu votingDuration berakhir
         await ethers.provider.send("evm_increaseTime", [2]);
