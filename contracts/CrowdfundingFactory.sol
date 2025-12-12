@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-/* Jadi ini factory namanya, gunanya supaya kalo orang mau buat campaign, 
-tinggal manggil function aja nti di FE gausa deploy manual kek biasae */
-
 import { Crowdfunding } from "./Crowdfunding.sol";
 
 contract CrowdfundingFactory {
@@ -19,7 +16,6 @@ contract CrowdfundingFactory {
 
     Campaign[] public campaigns;
 
-    // pake array karena satu user bisa buat banyak campaign jadi lek dikasi address bakal return semua campaignnya user tsb.
     mapping (address => Campaign[]) public userCampaigns;
 
     modifier onlyOwner() {
@@ -41,7 +37,6 @@ contract CrowdfundingFactory {
         string memory _description,
         uint256 _goal
     ) external notPaused {
-        // basic OOP lupa ak, pokoke ini deploy smart contract crowdfunding baru
         Crowdfunding newCampaign = new Crowdfunding(
             msg.sender,
             _name,
@@ -51,7 +46,6 @@ contract CrowdfundingFactory {
 
         address campaignAddress = address(newCampaign);
 
-        // ini campaign structnya, cuma buat info saja kalo nanti di getAllCampaigns
         Campaign memory campaign = Campaign ({
             campaignAddress: campaignAddress,
             owner: msg.sender,
@@ -72,6 +66,6 @@ contract CrowdfundingFactory {
     }
 
     function togglePause() public onlyOwner {
-        paused = !paused; // paused akan di set sesuai kebalikannya
+        paused = !paused;
     }
 }
