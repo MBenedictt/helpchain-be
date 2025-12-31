@@ -7,6 +7,7 @@ contract Crowdfunding {
     uint256 public goal;
     address public owner;
     uint256 public compoundingContributions;
+    uint256 public deadline;
 
     enum CampaignState { Active, Completed, Failed }
     CampaignState public state;
@@ -52,20 +53,36 @@ contract Crowdfunding {
         _;
     }
 
+    modifier donationOpen() {
+        require(
+            deadline == 0 || block.timestamp <= deadline,
+            "Donation period has ended."
+        );
+        _;
+    }
+
     constructor(
         address _owner,
         string memory _name,
         string memory _description,
-        uint256 _goal
+        uint256 _goal,
+        uint256 _duration // 0 = no deadline
     ) {
         campaign = _name;
         description = _description;
         goal = _goal;
         owner = _owner;
+
+        if (_duration > 0) {
+            deadline = block.timestamp + _duration;
+        } else {
+            deadline = 0;
+        }
+
         state = CampaignState.Active;
     }
 
-    function fund() public payable {
+    function fund() public payable donationOpen {
         require(msg.value > 0, "Must fund amount greater than 0.");
 
         // add new backer to list for iteration
@@ -208,7 +225,6 @@ contract Crowdfunding {
 
             emit WithdrawFinalized(_id, true, block.timestamp);
         } else {
-            state = CampaignState.Failed;
             emit WithdrawFinalized(_id, false, block.timestamp);
         }
     }
@@ -253,23 +269,6 @@ contract Crowdfunding {
     }
 
     function refund() public {
-        bool eligible = false;
-
-        if (state == CampaignState.Failed) {
-            eligible = true;
-        } else {
-            for (uint256 i = 1; i <= withdrawRequestCount; i++) {
-                WithdrawRequest storage req = withdrawRequests[i];
-                uint8 v = req.votes[msg.sender];
-                if (v == 2) {
-                    eligible = true;
-                    break;
-                }
-            }
-        }
-
-        require(eligible, "Refund not allowed.");
-
         uint256 amount = backers[msg.sender].totalContribution;
         require(amount > 0, "Nothing to refund.");
 
@@ -277,7 +276,8 @@ contract Crowdfunding {
         totalContributions -= amount;
         compoundingContributions -= amount;
 
-        payable(msg.sender).transfer(amount);
+        (bool success, ) = payable(msg.sender).call{value: amount}("");
+        require(success, "Refund transfer failed.");
 
         emit RefundClaimed(msg.sender, amount);
     }
@@ -302,6 +302,10 @@ contract Crowdfunding {
     function endCampaign() external onlyOwner {
         require(state == CampaignState.Active, "Campaign already ended.");
         require(totalContributions == 0, "All funds must be withdrawn.");
+
+        if (deadline > 0) {
+            require(block.timestamp > deadline, "Donation period not ended.");
+        }
 
         if (compoundingContributions >= goal) {
             state = CampaignState.Completed;

@@ -35,13 +35,15 @@ contract CrowdfundingFactory {
     function createCampaign(
         string memory _name,
         string memory _description,
-        uint256 _goal
+        uint256 _goal,
+        uint256 _duration // 0 = no deadline
     ) external notPaused {
         Crowdfunding newCampaign = new Crowdfunding(
             msg.sender,
             _name,
             _description,
-            _goal
+            _goal,
+            _duration
         );
 
         address campaignAddress = address(newCampaign);
