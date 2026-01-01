@@ -12,7 +12,8 @@ describe("Crowdfunding.sol - finalizeWithdrawRequest()", function () {
             owner.address,
             "Clean Water Project",
             "Pembangunan sumur air bersih untuk desa terpencil",
-            ethers.parseEther("10")
+            ethers.parseEther("10"),
+            0
         );
         await crowdfunding.waitForDeployment();
 

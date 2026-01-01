@@ -12,7 +12,8 @@ describe("Crowdfunding.sol - fund()", function () {
             owner.address,
             "Clean Water Project",
             "Pembangunan sumur air bersih untuk desa terpencil",
-            1000
+            1000,
+            0
         );
         await crowdfunding.waitForDeployment();
     });
@@ -75,5 +76,31 @@ describe("Crowdfunding.sol - fund()", function () {
             crowdfunding.connect(backer2).fund({ value: 0 })
         ).to.be.revertedWith("Must fund amount greater than 0.");
         console.log("✅ Test (b) berhasil - transaksi ditolak sesuai logika.\n");
+    });
+
+    // (c) Donasi ditolak setelah deadline berakhir
+    it("should revert donation if campaign deadline has ended", async function () {
+        console.log("\n=== Kasus Uji (c): Donasi setelah deadline ===");
+
+        // Deploy campaign BERJANGKA (5 detik)
+        const timeLimitedCampaign = await Crowdfunding.deploy(
+            owner.address,
+            "Time Limited Campaign",
+            "Campaign dengan batas waktu",
+            1000,
+            5 // duration
+        );
+        await timeLimitedCampaign.waitForDeployment();
+
+        // Majukan waktu melebihi deadline
+        await ethers.provider.send("evm_increaseTime", [10]);
+        await ethers.provider.send("evm_mine");
+
+        // Coba donasi setelah deadline
+        await expect(
+            timeLimitedCampaign.connect(backer1).fund({ value: 100 })
+        ).to.be.revertedWith("Donation period has ended.");
+
+        console.log("✅ Test (c) berhasil - Donasi setelah deadline ditolak.\n");
     });
 });

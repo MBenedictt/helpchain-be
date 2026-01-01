@@ -12,7 +12,8 @@ describe("Crowdfunding.sol - endCampaign()", function () {
             owner.address,
             "Clean Water Project",
             "Pembangunan sumur air bersih untuk desa terpencil",
-            ethers.parseEther("10") // goal = 10 ETH
+            ethers.parseEther("10"),
+            0
         );
         await crowdfunding.waitForDeployment();
     });
@@ -106,5 +107,32 @@ describe("Crowdfunding.sol - endCampaign()", function () {
         );
 
         console.log("✅ Test (d) berhasil - End campaign ditolak karena masih ada dana.\n");
+    });
+
+    // (e) Campaign berjangka - belum melewati deadline
+    it("should revert endCampaign if campaign is time-limited and deadline has not ended", async function () {
+        console.log("\n=== Kasus Uji (e): End campaign sebelum deadline ===");
+
+        // Deploy ulang campaign BERJANGKA (5 detik)
+        const Crowdfunding = await ethers.getContractFactory("Crowdfunding");
+        const timeLimitedCampaign = await Crowdfunding.deploy(
+            owner.address,
+            "Time Limited Campaign",
+            "Campaign dengan batas waktu",
+            ethers.parseEther("10"),
+            5 // duration
+        );
+        await timeLimitedCampaign.waitForDeployment();
+
+        // Pastikan tidak ada dana
+        const total = await timeLimitedCampaign.totalContributions();
+        expect(total).to.equal(0);
+
+        // Coba end campaign sebelum deadline
+        await expect(
+            timeLimitedCampaign.connect(owner).endCampaign()
+        ).to.be.revertedWith("Donation period not ended.");
+
+        console.log("✅ Test (e) berhasil - End campaign sebelum deadline ditolak.\n");
     });
 });

@@ -12,13 +12,18 @@ describe("CrowdfundingFactory.sol - createCampaign()", function () {
         await factory.waitForDeployment();
     });
 
-    it("should create a new campaign successfully", async function () {
-        console.log("\n=== Kasus Uji Owner membuat campaign baru ===");
+    /**
+     * TEST 1
+     * Membuat campaign tanpa batas waktu (non-berjangka)
+     */
+    it("should create a non-time-limited campaign successfully", async function () {
+        console.log("\n=== Kasus Uji: Membuat campaign tanpa batas waktu ===");
 
         await factory.connect(user1).createCampaign(
             "Education Aid",
             "Bantuan pendidikan untuk anak kurang mampu",
-            ethers.parseEther("5")
+            ethers.parseEther("5"),
+            0 // duration = 0 → no deadline
         );
 
         const campaigns = await factory.getAllCampaigns();
@@ -28,8 +33,46 @@ describe("CrowdfundingFactory.sol - createCampaign()", function () {
         expect(createdCampaign.campaignAddress).to.properAddress;
         expect(createdCampaign.owner).to.equal(user1.address);
 
+        console.log(`Alamat Campaign: ${createdCampaign.campaignAddress}`);
+        console.log(`Pemilik Campaign: ${createdCampaign.owner}`);
+        console.log("✅ Test berhasil - Campaign tanpa batas waktu berhasil dibuat.\n");
+    });
+
+    /**
+     * TEST 2
+     * Membuat campaign berjangka (memiliki deadline)
+     */
+    it("should create a time-limited campaign with valid deadline", async function () {
+        console.log("\n=== Kasus Uji: Membuat campaign berjangka ===");
+
+        const duration = 7 * 24 * 60 * 60; // 7 hari
+
+        await factory.connect(user1).createCampaign(
+            "Disaster Relief",
+            "Bantuan korban bencana alam",
+            ethers.parseEther("10"),
+            duration
+        );
+
+        const campaigns = await factory.getAllCampaigns();
+        const createdCampaign = campaigns[0];
+
+        // Ambil instance campaign untuk cek deadline
+        const Crowdfunding = await ethers.getContractFactory("Crowdfunding");
+        const campaign = Crowdfunding.attach(createdCampaign.campaignAddress);
+
+        const deadline = await campaign.deadline();
+        const currentTime = (await ethers.provider.getBlock("latest")).timestamp;
+
+        expect(deadline).to.be.gt(currentTime);
+        expect(deadline).to.be.closeTo(
+            BigInt(currentTime + duration),
+            BigInt(5) // toleransi 5 detik
+        );
+
         console.log(`Alamat Campaign Baru: ${createdCampaign.campaignAddress}`);
         console.log(`Pemilik Campaign: ${createdCampaign.owner}`);
-        console.log("✅ Test berhasil - Campaign baru berhasil dibuat.\n");
+        console.log(`Deadline Campaign: ${deadline.toString()}`);
+        console.log("✅ Test berhasil - Campaign berjangka berhasil dibuat dengan deadline valid.\n");
     });
 });

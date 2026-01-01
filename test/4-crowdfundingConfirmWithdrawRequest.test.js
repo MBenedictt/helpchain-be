@@ -12,7 +12,8 @@ describe("Crowdfunding.sol - confirmWithdrawRequest()", function () {
             owner.address,
             "Clean Water Project",
             "Pembangunan sumur air bersih untuk desa terpencil",
-            1000
+            1000,
+            0
         );
         await crowdfunding.waitForDeployment();
 

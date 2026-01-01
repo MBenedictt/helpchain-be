@@ -225,6 +225,7 @@ contract Crowdfunding {
 
             emit WithdrawFinalized(_id, true, block.timestamp);
         } else {
+            state = CampaignState.Failed;
             emit WithdrawFinalized(_id, false, block.timestamp);
         }
     }
