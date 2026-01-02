@@ -36,14 +36,14 @@ contract CrowdfundingFactory {
         string memory _name,
         string memory _description,
         uint256 _goal,
-        uint256 _duration // 0 = no deadline
+        uint256 _deadline // 0 = no deadline
     ) external notPaused {
         Crowdfunding newCampaign = new Crowdfunding(
             msg.sender,
             _name,
             _description,
             _goal,
-            _duration
+            _deadline
         );
 
         address campaignAddress = address(newCampaign);

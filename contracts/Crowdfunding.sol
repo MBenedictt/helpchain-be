@@ -66,15 +66,16 @@ contract Crowdfunding {
         string memory _name,
         string memory _description,
         uint256 _goal,
-        uint256 _duration // 0 = no deadline
+        uint256 _deadline // 0 = no deadline
     ) {
         campaign = _name;
         description = _description;
         goal = _goal;
         owner = _owner;
 
-        if (_duration > 0) {
-            deadline = block.timestamp + _duration;
+        if (_deadline > 0) {
+            require(_deadline > block.timestamp, "Deadline must be in the future");
+            deadline = _deadline;
         } else {
             deadline = 0;
         }
