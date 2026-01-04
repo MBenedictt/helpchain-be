@@ -82,18 +82,21 @@ describe("Crowdfunding.sol - fund()", function () {
     it("should revert donation if campaign deadline has ended", async function () {
         console.log("\n=== Kasus Uji (c): Donasi setelah deadline ===");
 
+        const now = (await ethers.provider.getBlock("latest")).timestamp;
+        const deadlineTimestamp = now + 7 * 24 * 60 * 60;
+
         // Deploy campaign BERJANGKA (5 detik)
         const timeLimitedCampaign = await Crowdfunding.deploy(
             owner.address,
             "Time Limited Campaign",
             "Campaign dengan batas waktu",
             1000,
-            5 // duration
+            deadlineTimestamp // duration
         );
         await timeLimitedCampaign.waitForDeployment();
 
         // Majukan waktu melebihi deadline
-        await ethers.provider.send("evm_increaseTime", [10]);
+        await ethers.provider.send("evm_increaseTime", [7 * 24 * 60 * 3600]);
         await ethers.provider.send("evm_mine");
 
         // Coba donasi setelah deadline

@@ -113,6 +113,9 @@ describe("Crowdfunding.sol - endCampaign()", function () {
     it("should revert endCampaign if campaign is time-limited and deadline has not ended", async function () {
         console.log("\n=== Kasus Uji (e): End campaign sebelum deadline ===");
 
+        const now = (await ethers.provider.getBlock("latest")).timestamp;
+        const deadlineTimestamp = now + 7 * 24 * 60 * 60;
+
         // Deploy ulang campaign BERJANGKA (5 detik)
         const Crowdfunding = await ethers.getContractFactory("Crowdfunding");
         const timeLimitedCampaign = await Crowdfunding.deploy(
@@ -120,7 +123,7 @@ describe("Crowdfunding.sol - endCampaign()", function () {
             "Time Limited Campaign",
             "Campaign dengan batas waktu",
             ethers.parseEther("10"),
-            5 // duration
+            deadlineTimestamp // duration
         );
         await timeLimitedCampaign.waitForDeployment();
 
